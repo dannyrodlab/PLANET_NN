@@ -7,7 +7,7 @@ import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
-import timels
+import time
 import os
 import copy
 ## import pdb
@@ -15,8 +15,15 @@ import copy
 ## import visdom
 
 def save_checkpoint(state, filename):
-    filename_checkpoint = filename + 'checkpoint.pth.tar'
-    torch.save(state, filename_checkpoint)
+    print("=> saving checkpoint '{}'".format(filename))
+    filename_checkpoint = 'checkpoints/'+ filename + '_checkpoint.pth.tar'
+    if os.path.isfile(filename_checkpoint):
+        filename_checkpoint = 'checkpoints/'+ filename + '_new_checkpoint.pth.tar'
+        ## torch.save(state, filename_checkpoint)
+        print('Come on!')
+    else:
+        ## torch.save(state, filename_checkpoint)
+        print('Come on two!')
 
 def train_model(name, resume, model, dataloaders, criterion, optimizer, device, num_epochs, is_inception=False):
     """
@@ -42,8 +49,6 @@ def train_model(name, resume, model, dataloaders, criterion, optimizer, device, 
             print("=> no checkpoint found at '{}'".format(resume))
 
     since = time.time()
-
-    val_acc_history = []
 
     history_acc = []
     history_loss = []
@@ -121,23 +126,20 @@ def train_model(name, resume, model, dataloaders, criterion, optimizer, device, 
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
-                val_acc_history.append(epoch_acc)
                 best_acc = epoch_acc
                 save_checkpoint({'epoch': epoch + 1,
                                 'state_dict': model.state_dict(),
                                 'optimizer' : optimizer.state_dict()}, 
                                 name)
-            if phase == 'val':
-                val_acc_history.append(epoch_acc)
 
     ## print()
     ## name_file = 'vgg' + '.txt' 
     ## datetime.datetime.now().strftime("%y%m%d%H%M") +
-    np.savetxt(name, (history_acc, history_loss, history_val_acc, history_val_loss), delimiter=',')
     time_elapsed = time.time() - since
+    np.savetxt('./results/' + name + '.txt', (history_acc, history_loss, history_val_acc, history_val_loss), delimiter=',')
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     print('Best val Acc: {:4f}'.format(best_acc))
 
     # load best model weights
-    model.load_state_dict(best_model_wts)
-    return model, val_acc_history
+    ## model.load_state_dict(best_model_wts)
+    return model

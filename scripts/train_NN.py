@@ -48,7 +48,7 @@ model_resume = args.resume
 if (problem == 'atmospheric'):
     num_classes = 4
 else:
-    labels = pd.read_csv('data/train_v2.csv')
+    labels = pd.read_csv('../data/train_v2.csv')
     num_classes = len(list(set(labels['tags'])))
 
 # Flag for feature extracting. When False, we finetune the whole model,
@@ -63,8 +63,8 @@ print(model_ft)
 #TODO split data in code not in directories
 
 # Create training and validation datasets
-image_datasets = {x: PlanetDataset(csv_file='data/train_v2.csv',
-                                    root_dir='data/fast_' + x,
+image_datasets = {x: PlanetDataset(csv_file='../data/train_v2.csv',
+                                    root_dir='../data/fast_' + x,
                                     extension='.jpg',problem=problem , transform=transforms.Compose([
                                               transforms.Resize(input_size),transforms.ToTensor()])) for x in ['train', 'val']}
 # Create training and validation dataloaders
@@ -102,4 +102,4 @@ optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
 # Train and evaluate
-model_ft, hist = train_model(name_file, model_resume, model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, device = device, is_inception=(model_name=="inception"))
+model_ft = train_model(name_file, model_resume, model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, device = device, is_inception=(model_name=="inception"))
