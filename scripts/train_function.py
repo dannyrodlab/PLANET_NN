@@ -7,14 +7,18 @@ import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
-import time
+import timels
 import os
 import copy
 ## import pdb
 ## import tqdm
 ## import visdom
 
-def train_model(name, model, dataloaders, criterion, optimizer, device, num_epochs, is_inception=False):
+def save_checkpoint(state, filename):
+    filename_checkpoint = filename + 'checkpoint.pth.tar'
+    torch.save(state, filename_checkpoint)
+
+def train_model(name, resume, model, dataloaders, criterion, optimizer, device, num_epochs, is_inception=False):
     """
        Train_model function loads the dataloa der to the choosen model, run train and validation steps
        model: model choosen
@@ -23,6 +27,20 @@ def train_model(name, model, dataloaders, criterion, optimizer, device, num_epoc
        optimizer: derivates for backpropagation
        device: GPU or CPU
     """
+    # optionally resume from a checkpoint
+    if resume:
+        if os.path.isfile(resume):
+            print("=> loading checkpoint '{}'".format(resume))
+            checkpoint = torch.load(resume)
+            ## start_epoch = checkpoint['epoch']
+            best_acc = checkpoint['best_acc']
+            model.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(resume, checkpoint['epoch']))
+        else:
+            print("=> no checkpoint found at '{}'".format(resume))
+
     since = time.time()
 
     val_acc_history = []
@@ -103,8 +121,12 @@ def train_model(name, model, dataloaders, criterion, optimizer, device, num_epoc
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
+                val_acc_history.append(epoch_acc)
                 best_acc = epoch_acc
-                best_model_wts = copy.deepcopy(model.state_dict())
+                save_checkpoint({'epoch': epoch + 1,
+                                'state_dict': model.state_dict(),
+                                'optimizer' : optimizer.state_dict()}, 
+                                name)
             if phase == 'val':
                 val_acc_history.append(epoch_acc)
 

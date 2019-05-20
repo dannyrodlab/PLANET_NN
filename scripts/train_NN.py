@@ -27,6 +27,7 @@ parser.add_argument('--model', type=str, required=True, choices=['resnet', 'alex
 parser.add_argument('--epoch', type=int, default=15)
 parser.add_argument('--batch', type=int, default=24)
 parser.add_argument('--name', type=str, required=True)
+parser.add_argument('--resume', default='', type=str, help='path to latest checkpoint (default: none)')
 args = parser.parse_args()
 
 # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
@@ -41,6 +42,8 @@ num_epochs = args.epoch
 num_classes = 0
 # Name of file
 name_file = args.name
+# Resume checkpoint
+model_resume = args.resume
 #labels
 if (problem == 'atmospheric'):
     num_classes = 4
@@ -96,8 +99,7 @@ optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
 
 # Setup the loss fxn
 #TODO modify the loss function.
-
 criterion = nn.CrossEntropyLoss()
 
 # Train and evaluate
-model_ft, hist = train_model(name_file,model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, device = device, is_inception=(model_name=="inception"))
+model_ft, hist = train_model(name_file, model_resume, model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs, device = device, is_inception=(model_name=="inception"))
