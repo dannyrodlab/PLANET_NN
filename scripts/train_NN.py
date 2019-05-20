@@ -7,7 +7,7 @@ import numpy as np
 from create_planet_dataset import PlanetDataset
 import torchvision
 from torchvision import datasets, models, transforms
-from fine_tunnedNN import initialize_model
+from models import initialize_model
 from train_function import train_model
 import matplotlib.pyplot as plt
 import time
